@@ -3,8 +3,13 @@ import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 from scipy.integrate import solve_ivp
 
+
+
+
 class LandScape:
-    """contains a sampled spacial landscape of static electric potential information"""
+    """
+    contains a sampled spatial landscape of static electric potential information
+    """
 
     def __init__(self):
         #self.landscape_ = np.zeros((x_dim,y_dim,z_dim))
@@ -15,11 +20,13 @@ class LandScape:
         self.ax_.set_zlabel('z')
         
     def add_charges(self,charge_list):
-        """charge list should be [[x,y,z,q],...]"""
+        """
+        charge list should be [[x,y,z,q],...]
+        """
         self.charges_ = np.concatenate((self.charges_,charge_list),axis=0)
 
     def plot_charge_locations(self):
-                
+        
         self.ax_.scatter3D(self.charges_[:,0],
                      self.charges_[:,1],
                      self.charges_[:,2],
@@ -40,11 +47,13 @@ class LandScape:
         
 
 class ChargeCube:
-    '''one dilema here is that charge is uniform distributed..
+    '''
+    one dilema here is that charge is uniform distributed..
 
     Im thinking that one way to fix this would be to feed in some 'center of body' coord that charge could grow as it is further away,
     so the density of point charges would still be unform but the charge would increase, which should have roughly the same effect as increasing
-    charge density at the parts of the shape that stick out more'''
+    charge density at the parts of the shape that stick out more
+    '''
 
     def __init__(self, x1,y1,z1, x2,y2,z2,density = lambda x,y,z,q : -1,q = -1,step = 1):
         #there might be clever numpy magic to vectorize this but its speed is pretty irrelevant compatered to potential
@@ -57,17 +66,38 @@ class ChargeCube:
         
 class Particle:
     '''
-    Approximate the wave function for the landscape
+    A Particle that lives in the potential landscape
+    
+    has its own mass and charge
+    
+    Obeys an approximation of the TISE for the wave function in this landscape
     '''
     def __init__(self,mass,charge,x0,y0,k0):
+        '''
+        store impotant values for calculating PDE solutions
+        '''
         self.mass = mass
         self.charge = charge
         self.x0 = x0
         self.y0 = y0
         self.k0 = k0
         
+    def psuedo_wkb(self,potential,energy,X,Y):
+        '''
+        cheaty way to approximate the wave function
+        '''
+        raise NotImplemented("")
+        kx = np.sqrt((potential-energy)/self.mass,dtype=complex)
+        ky = np.sqrt((potential-energy)/self.mass,dtype=complex)
+        psi = np.exp(kx*X+ky*Y)
+        return psi
+    
+    
     def wave_function(self,X,potential,x0,y0,k0):
-        #raise NotImplemented("fu")
+        '''
+        eventually will solve ODEs/PDEs for the TISE
+        '''
+        raise NotImplemented("")
         
         z = potential[np.shape(potential)[0]//2]
         x = X[np.shape(potential)[0]//2]
@@ -85,6 +115,7 @@ class Particle:
         
         
 
+# Attempt at ODE solving
 def schrodinger(psi,V,E=1.):
     raise NotImplemented("need to figure out solving system of ODE")
     return E*psi - V*psi
@@ -95,7 +126,6 @@ def phi_prime_is_psi(psi,x):
 
    
 # charge density functions 
-
 def const(x,y,z,q): return q
 def linear(x,y,z,q): return q*np.sqrt(x*x + y*y + z*z)
 def quadratic(x,y,z,q): return q*(x*x + y*y + z*z)
@@ -106,6 +136,7 @@ def quadratic(x,y,z,q): return q*(x*x + y*y + z*z)
     
 if __name__ == "__main__":
     
+    # Testing the wave function approximations
     '''
     foo = LandScape()
     foo.add_charges(ChargeCube(0,0,0,5,5,0).charges())
@@ -118,6 +149,8 @@ if __name__ == "__main__":
     e.wave_function(X,foo.potential(X,Y,-1),0,0,1)
     
     '''
+    
+    # Make a pretty landscape graph
     foo = LandScape()
     foofoo = Particle(1,1,-5,0,1)
     foo.add_charges(ChargeCube(0,0,0,5,5,0,density=quadratic).charges())
